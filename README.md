@@ -76,6 +76,10 @@ Image generation and editing share same-provider account scheduling: try the def
 
 ## Install
 
+### DSH compatibility
+
+The current release supports the published DSH `0.1.1-rc.2`, `0.1.2-alpha`/`rc`, `0.1.3-alpha`, and `0.1.5-alpha`/`rc` lines, including `0.1.5-rc.2`. The `0.1.5-alpha.1` peer-range anchor intentionally covers the later `0.1.5-alpha`, `0.1.5-rc`, and stable `0.1.5` builds under npm semver rules. DSH `0.1.6-alpha` is not included until it has been separately verified.
+
 ### Managing accounts and pool models
 
 Open **Settings → Subscriptions → provider → Manage** to edit account aliases, automatic-pool participation and model allowlists, and independent account model entries. Existing accounts continue using automatic pooling by default. Independent entries stay bound to one account and never fall back to another account when unavailable. These settings govern LLM routing, not image/video/search tool account policies. See [Account and model management](docs/account-management.md).
@@ -84,7 +88,7 @@ Open **Settings → Subscriptions → provider → Manage** to edit account alia
 
 In **Settings → Subscriptions → provider → Edit model list**, use **Refresh** to bypass the five-minute catalog cache and refresh the conversation model picker too. This is separate from refreshing subscription usage. If `models.<provider>` is explicitly configured with a non-empty list, that list still overrides discovery.
 
-Codex catalog visibility depends on the `client_version` request parameter. By default the plugin reads the stable version from the official npm `@openai/codex` package's public metadata (no CLI installation or subscription credentials sent to npm). Successful lookups are cached in memory for six hours; failures retry after five minutes and retain the last successful version, or the verified `0.153.4` fallback on first use. The lookup has a 1.5-second deadline, shares in-flight work across accounts, and ignores prerelease or regressed versions. Manual model-list refresh also rechecks the version. An explicit plugin configuration field, `codexClientVersion: '0.153.4'`, takes precedence and disables automatic lookup; restart DSH after changing it. Model availability remains account-dependent; see [verification notes](docs/codex-catalog-refresh.md).
+Codex catalog visibility depends on the `client_version` request parameter. By default the plugin reads the stable version from the official npm `@openai/codex` package's public metadata (no CLI installation or subscription credentials sent to npm). Successful lookups are cached in memory for six hours; failures retry after five minutes and retain the last successful version, or the verified `0.153.4` fallback on first use. The lookup has a 5-second deadline, shares in-flight work across accounts, and ignores prerelease or regressed versions. On load the plugin also raises Node's Happy Eyeballs per-address connect attempt timeout to at least 1.5 seconds (never lowering a larger host value), because the 250ms default drops every connection on links where one TCP handshake takes longer than that. Manual model-list refresh also rechecks the version. An explicit plugin configuration field, `codexClientVersion: '0.153.4'`, takes precedence and disables automatic lookup; restart DSH after changing it. Model availability remains account-dependent; see [verification notes](docs/codex-catalog-refresh.md).
 
 ### Installation commands
 
@@ -150,7 +154,7 @@ Every provider accepts several accounts: once one is connected, the card grows a
 
 ### Edit visible models, context windows, and tools
 
-Open **Settings → Subscriptions → provider → Edit model list**, search and select models, then **Save changes**. All discovered models are shown automatically by default. Selecting individual models, selecting all, or clearing the selection saves an explicit list; newly discovered models then stay hidden until selected. Enable automatic display again to restore discovery-driven visibility. Hidden models remain usable by existing sessions, and the editor retains the full catalog so they can be restored. Refreshing discovery preserves preferences; Cancel discards unsaved edits.
+Open **Settings → Subscriptions → provider → Edit model list**, search and select models, then **Save changes**. All discovered models are shown automatically by default. Selecting individual models, selecting all, or clearing the selection saves an explicit list; newly discovered models then stay hidden until selected. Enable automatic display again to restore discovery-driven visibility. Hidden models remain usable by existing sessions, and the editor retains the full catalog so they can be restored. Refreshing discovery preserves preferences. The dialog has one **Save changes** / **Cancel** pair: Save submits the model list together with the account settings above it, and Cancel discards both and closes the dialog.
 
 Codex models also accept a context budget in tokens; leave it blank to follow the provider. The plugin reads each account's `context_window` and `max_context_window`, caps the requested budget at that account's maximum, and uses the advertised default as the conservative ceiling when no maximum is provided. Account pools resolve each member separately and use the smallest window. This changes DSH's local history budget and compaction timing, without sending an API capacity override. Longer contexts can increase response latency.
 
@@ -160,7 +164,7 @@ Preferences and tool-policy history live in `~/.dsh/plugins/subscriptions/provid
 
 ### Reasoning defaults in the model editor
 
-Default reasoning effort now lives in **Edit model list**, beside each model's visibility and context settings. Apply edits with **Save changes**, or discard unsaved edits with Cancel. Hidden models remain editable. Models without reasoning levels have no selector; **Follow provider** clears an override. Choices come from live capabilities, intersected across account-pool members. Custom pool aliases do not offer ineffective effort overrides.
+Default reasoning effort now lives in **Edit model list**, beside each model's visibility and context settings. Apply edits with the dialog's **Save changes**, or discard unsaved edits with Cancel. Hidden models remain editable. Models without reasoning levels have no selector; **Follow provider** clears an override. Choices come from live capabilities, intersected across account-pool members. Custom pool aliases do not offer ineffective effort overrides.
 
 Existing defaults continue to load from and save to `~/.dsh/plugins/subscriptions/model-defaults.json` (mode 0600). If a save fails partway through, unfinished edits remain in the draft; the UI reports any defaults already saved and lets you retry.
 

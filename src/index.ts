@@ -129,7 +129,7 @@ import type { AntigravityRuntimeConfig } from './providers/antigravity.js'
 import { createXSearchTool } from './tools/x-search.js'
 import { createImageGenerateTool } from './tools/image-generate.js'
 import { createVideoGenerateTool, videosDirectory } from './tools/video-generate.js'
-import { proxiedFetch, proxyGetConfig, proxySetConfig, proxyTestConnection } from './http.js'
+import { ensureConnectAttemptTimeout, proxiedFetch, proxyGetConfig, proxySetConfig, proxyTestConnection, restoreConnectAttemptTimeout } from './http.js'
 import { ProviderSettingsStore, PROVIDER_TOOLS, validatePreferences } from './provider-settings.js'
 
 export type { ModelEntry, ProviderUsage, UsageWindow } from './providers/common.js'
@@ -248,6 +248,7 @@ const DEFAULT_MODELS: Record<ProviderId, ModelEntry[]> = {
     { id: 'gpt-5.1', name: 'GPT-5.1' },
   ],
   claude: [
+    { id: 'claude-opus-5-5', name: 'Claude Opus 5.5', maxTokens: 128_000, contextWindow: 1_000_000 },
     { id: 'claude-opus-5', name: 'Claude Opus 5', maxTokens: 128_000, contextWindow: 1_000_000 },
     { id: 'claude-sonnet-5', name: 'Claude Sonnet 5', maxTokens: 128_000, contextWindow: 1_000_000 },
     { id: 'claude-fable-5', name: 'Claude Fable 5', maxTokens: 128_000, contextWindow: 1_000_000 },
@@ -620,6 +621,11 @@ export class SubscriptionsAuthController implements AuthController {
 }
 
 export function apply(ctx: Context, config: Config): void {
+  // Outbound requests (catalog discovery, the npm version lookup, token
+  // refresh) must survive links where one TCP handshake exceeds Node's 250ms
+  // Happy Eyeballs attempt budget; see MIN_CONNECT_ATTEMPT_TIMEOUT_MS.
+  const previousAttemptTimeout = ensureConnectAttemptTimeout()
+  ctx.effect(() => () => { restoreConnectAttemptTimeout(previousAttemptTimeout) }, 'dsh-plugin-subscriptions: connect attempt timeout')
   const preferences = new ProviderSettingsStore()
   const codexVersion = new CodexClientVersionCache()
   const providers = [...new Set(config.providers ?? [...PROVIDER_IDS])]
