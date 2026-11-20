@@ -661,6 +661,8 @@ export interface CodexAdapterOptions {
    */
   defaultEffortOf?: (model: string) => string | undefined
   contextWindowOf?: (model: string) => number | undefined
+  defaultContextWindow?: () => number | undefined
+  defaultMaxTokens?: () => number | undefined
   /**
    * Per-request speed lookup (the composer Speed toggle's host half). Returns
    * whether this session's current choice sends the model on the fast tier;
@@ -1077,7 +1079,7 @@ export class CodexAdapter extends LlmAdapter {
       ...discovered?.description === undefined ? {} : { description: discovered.description },
       inputModalities: configured?.inputModalities ?? CODEX_MODALITIES,
       context: { contextWindow: await this.contextWindowFor(model, account) },
-      defaultMaxTokens: configured?.maxTokens ?? CODEX_DEFAULT_MAX_TOKENS,
+      defaultMaxTokens: configured?.maxTokens ?? this.options.defaultMaxTokens?.() ?? CODEX_DEFAULT_MAX_TOKENS,
       ...(reasoning === undefined ? {} : { reasoning }),
     }
   }
@@ -1092,7 +1094,10 @@ export class CodexAdapter extends LlmAdapter {
 
   private async contextWindowFor(model: string, account?: string): Promise<number> {
     const limits = await this.contextLimits(model, account)
-    return Math.min(this.options.contextWindowOf?.(model) ?? limits.default, limits.max)
+    const requested = this.options.contextWindowOf?.(model)
+      ?? this.options.defaultContextWindow?.()
+      ?? limits.default
+    return Math.min(requested, limits.max)
   }
 
   async *stream(options: GenerateOptions): AsyncIterable<StreamChunk> {
