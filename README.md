@@ -40,7 +40,7 @@ Models that advertise reasoning levels get an **Effort** selector in the same me
 
 ![Reasoning effort selector](https://raw.githubusercontent.com/V1ki/dsh-plugin-subscriptions/main/docs/images/model-effort.png)
 
-The Composer no longer has a Standard/Fast Speed chip. Instead, when a recognized Codex or Claude model is selected, a compact inline slider next to the native model picker lets you switch between recognized models from the same provider. Hover over or focus the slider to see the model name. Dragging previews the choice; releasing the slider applies it. Reasoning effort is still selected in the native model picker.
+The Composer no longer has a Standard/Fast Speed chip. Instead, when a recognized Codex or Claude model is selected, a compact inline slider next to the native model picker lets you switch between recognized models from the same provider. Hover over or focus the slider to see the model name. Dragging previews the choice; releasing the slider applies it. When the native model picker is hidden, a brain button beside the slider lets you choose the current model’s reasoning effort or restore its default, without changing Fast.
 
 When both Codex and Claude have connected accounts and compatible models, the expanded slider offers a provider switch. Returning to a provider restores the model last used in the conversation if it is still available. If you hide the native picker in Subscriptions settings, it returns automatically whenever the slider is unavailable.
 
