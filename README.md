@@ -44,7 +44,7 @@ The Composer no longer has a Standard/Fast Speed chip. Instead, when a recognize
 
 When both Codex and Claude have connected accounts and compatible models, the expanded slider offers a provider switch. Returning to a provider restores the model last used in the conversation if it is still available. If you hide the native picker in Subscriptions settings, it returns automatically whenever the slider is unavailable.
 
-A lightning button to the left of the slider toggles Fast for Codex models that support it. It uses the same per-model preference as `/fast`. The slash command is unchanged: it opens a Standard/Fast popup for Codex models whose catalog advertises the fast tier. Fast uses `service_tier: priority`; if the current model does not support the fast tier, the command explains why.
+A lightning button to the left of the slider toggles Fast for Codex models that support it. It shares the session speed with `/fast`. The slash command is unchanged: it opens a Standard/Fast popup for Codex models whose catalog advertises the fast tier. Fast uses `service_tier: priority`; if the current model does not support the fast tier, the command explains why.
 
 Subagents have a separate per-model default: **Settings → Subscriptions → ChatGPT (Codex) → Manage → Edit model list → Subagent default speed**. Save changes to apply it to subsequent requests, including running subagents. This setting persists across restarts and works regardless of the parent model; main-session speed choices do not propagate to children. A speed explicitly selected in a child session overrides its model default, including Standard. Explicit session choices reset on restart. Fast still requires catalog support for the actual Codex model. Hosts without live agent origin metadata keep Standard unless the session has an explicit speed choice.
 
@@ -217,7 +217,7 @@ Preferences and tool-policy history live in `~/.dsh/plugins/subscriptions/provid
 
 ### Remembered Codex speed
 
-`/fast` remembers the last successful choice per underlying model (shared with its independent-account entries), across model switches and host restarts. These preferences live in `~/.dsh/plugins/subscriptions/model-speeds.json` (mode 0600), independently of the model editor's subagent speed defaults. Subagents still use their configured defaults unless explicitly overridden in that session. Fast routing always requires the current catalog to advertise it; a save failure leaves the previous confirmed choice unchanged. Legacy RPC callers without a model keep session-only behavior.
+An explicit Fast or Standard choice follows the current conversation across eligible Codex models, whether selected from the slider or the native picker. Switching to an ineligible model suspends Fast without clearing the choice. The toggle and `/fast` also save a fallback for only the model being explicitly changed (shared with its independent-account entries) in `~/.dsh/plugins/subscriptions/model-speeds.json` (mode 0600). Conversations without a session override use that saved per-model fallback; subagents still use their configured defaults unless explicitly overridden in their session. A failed save preserves the previous choice. Legacy RPC callers without a model update only the session override.
 
 ### Reasoning defaults in the model editor
 
