@@ -40,11 +40,13 @@ Models that advertise reasoning levels get an **Effort** selector in the same me
 
 ![Reasoning effort selector](https://raw.githubusercontent.com/V1ki/dsh-plugin-subscriptions/main/docs/images/model-effort.png)
 
-Codex models whose catalog advertises the fast tier (the codex CLI's fast mode) get a **Speed** toggle in the composer's tool row, next to the model selector — Standard or Fast (`service_tier: priority`), per session. The `/fast` slash command offers the same choice as a popup; it errors with an explanation when the current model has no fast tier.
+The Composer no longer has a Standard/Fast Speed chip. Instead, when a recognized Codex or Claude model is selected, a compact inline slider next to the native model picker lets you switch between recognized models from the same provider. Hover over or focus the slider to see the model name. Dragging previews the choice; releasing the slider applies it. Reasoning effort is still selected in the native model picker.
 
-Subagents have a separate per-model default: **Settings → Subscriptions → ChatGPT (Codex) → Manage → Edit model list → Subagent default speed**. Save changes to apply it to subsequent requests, including running subagents. This setting persists across restarts and works regardless of the parent model; main-session Speed choices do not propagate to children. A speed explicitly selected in a child session overrides its model default, including Standard. Explicit session choices reset on restart. Fast still requires catalog support for the actual Codex model. Hosts without live agent origin metadata keep Standard unless the session has an explicit speed choice.
+When both Codex and Claude have connected accounts and compatible models, the expanded slider offers a provider switch. Returning to a provider restores the model last used in the conversation if it is still available. If you hide the native picker in Subscriptions settings, it returns automatically whenever the slider is unavailable.
 
-![Speed toggle with the Standard/Fast menu open](https://raw.githubusercontent.com/V1ki/dsh-plugin-subscriptions/main/docs/images/speed-toggle.png)
+A lightning button to the left of the slider toggles Fast for Codex models that support it. It uses the same per-model preference as `/fast`. The slash command is unchanged: it opens a Standard/Fast popup for Codex models whose catalog advertises the fast tier. Fast uses `service_tier: priority`; if the current model does not support the fast tier, the command explains why.
+
+Subagents have a separate per-model default: **Settings → Subscriptions → ChatGPT (Codex) → Manage → Edit model list → Subagent default speed**. Save changes to apply it to subsequent requests, including running subagents. This setting persists across restarts and works regardless of the parent model; main-session speed choices do not propagate to children. A speed explicitly selected in a child session overrides its model default, including Standard. Explicit session choices reset on restart. Fast still requires catalog support for the actual Codex model. Hosts without live agent origin metadata keep Standard unless the session has an explicit speed choice.
 
 The composer's stats row gains a **subscription usage** pill showing quota information for the provider of the session's current model (Codex for a Codex model, Grok for a Grok model, and so on). It shows at most one provider, and only while a subscription model is selected: switching to an official or bring-your-own-key model hides the pill instead of leaving the previous subscription on screen. A model the shell cannot read yet keeps the current selection, so the pill does not flicker between polls. Nothing about this survives a page reload. Click the pill to expand every logged-in provider and account — the default account is starred, and the current provider is listed first. Antigravity previews only the current model's windows (at most two per account); the other model windows remain available in a closed disclosure.
 
@@ -213,9 +215,9 @@ The same editor controls Codex Web Search and image generation, plus Grok image 
 
 Preferences and tool-policy history live in `~/.dsh/plugins/subscriptions/provider-settings.json` (mode 0600), independently of model-catalog refresh. Existing non-empty `models.<provider>` configuration still defines the base catalog; visibility selections filter that catalog.
 
-### Remembered composer speed
+### Remembered Codex speed
 
-The Codex **Speed** control and `/fast` remember the last successful choice per underlying model (shared with its independent-account entries), across model switches and host restarts. These preferences live in `~/.dsh/plugins/subscriptions/model-speeds.json` (mode 0600), independently of the model editor's subagent speed defaults. Subagents still use their configured defaults unless explicitly overridden in that session. Fast routing always requires the current catalog to advertise it; a save failure leaves the previous confirmed choice unchanged. Legacy RPC callers without a model keep session-only behavior.
+`/fast` remembers the last successful choice per underlying model (shared with its independent-account entries), across model switches and host restarts. These preferences live in `~/.dsh/plugins/subscriptions/model-speeds.json` (mode 0600), independently of the model editor's subagent speed defaults. Subagents still use their configured defaults unless explicitly overridden in that session. Fast routing always requires the current catalog to advertise it; a save failure leaves the previous confirmed choice unchanged. Legacy RPC callers without a model keep session-only behavior.
 
 ### Reasoning defaults in the model editor
 
