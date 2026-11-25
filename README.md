@@ -217,7 +217,7 @@ Preferences and tool-policy history live in `~/.dsh/plugins/subscriptions/provid
 
 ### Remembered Codex speed
 
-An explicit Fast or Standard choice follows the current conversation across eligible Codex models, whether selected from the slider or the native picker. Switching to an ineligible model suspends Fast without clearing the choice. The toggle and `/fast` also save a fallback for only the model being explicitly changed (shared with its independent-account entries) in `~/.dsh/plugins/subscriptions/model-speeds.json` (mode 0600). Conversations without a session override use that saved per-model fallback; subagents still use their configured defaults unless explicitly overridden in their session. A failed save preserves the previous choice. Legacy RPC callers without a model update only the session override.
+Fast is off by default in main conversations. An explicit Fast or Standard choice applies only to the current conversation and follows it across eligible Codex models. Switching to an ineligible model suspends Fast without clearing the choice. The choice resets when the host restarts; old per-model Composer speed preferences are ignored. Subagents still use their separately configured defaults unless explicitly overridden in their session.
 
 ### Reasoning defaults in the model editor
 
